@@ -24,9 +24,7 @@ This demo proves a focused pipeline: **PDF in → validated structured records o
 
 ## Screenshots
 
-| English | Japanese |
-|---|---|
-| ![Upload EN](docs/screenshots/screenshot-en.png) | ![Upload JA](docs/screenshots/screenshot-ja.png) |
+Screenshots will be added after Live Demo deployment. Run locally with the sample PDF to preview EN / JP upload and result states.
 
 ---
 
