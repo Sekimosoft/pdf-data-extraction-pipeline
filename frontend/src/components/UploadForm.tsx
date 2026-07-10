@@ -62,15 +62,15 @@ export function UploadForm({ onResult, onError, onLoading }: Props) {
     try {
       const result = await extractPdf(file, locale);
       onResult(result);
-    } catch {
-      onError(t.errUnexpected);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : t.errExtractionFailed);
     } finally {
       onLoading(false);
     }
   };
 
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
+    <div style={{ display: "grid", gap: "1rem", minWidth: 0, maxWidth: "100%" }}>
       <div
         role="button"
         tabIndex={0}
@@ -118,56 +118,50 @@ export function UploadForm({ onResult, onError, onLoading }: Props) {
             flexWrap: "wrap",
           }}
         >
-          <span>
+          <span style={{ overflowWrap: "anywhere" }}>
             {t.selectedFile}: <strong>{file.name}</strong>
           </span>
-          <button
-            type="button"
-            onClick={() => handleFile(null)}
-            style={{
-              background: "transparent",
-              border: `1px solid ${colors.border}`,
-              color: colors.muted,
-              borderRadius: 6,
-              padding: "0.35rem 0.75rem",
-              cursor: "pointer",
-            }}
-          >
+          <button type="button" onClick={() => handleFile(null)} style={secondaryButtonStyle}>
             {t.removeFile}
           </button>
         </div>
       )}
 
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-        <button
-          type="button"
-          onClick={onSubmit}
-          style={{
-            background: colors.accent,
-            color: "#042f2e",
-            border: "none",
-            borderRadius: 8,
-            padding: "0.65rem 1.25rem",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
+        <button type="button" onClick={onSubmit} style={primaryButtonStyle}>
           {t.extractButton}
         </button>
-        <a
-          href={samplePdfUrl()}
-          download="sample-invoice.pdf"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            color: colors.accent,
-            textDecoration: "none",
-            fontSize: "0.875rem",
-          }}
-        >
+        <a href={samplePdfUrl(locale)} download style={linkStyle}>
           {t.downloadSample}
         </a>
       </div>
     </div>
   );
 }
+
+const primaryButtonStyle: React.CSSProperties = {
+  background: colors.accent,
+  color: "#042f2e",
+  border: "none",
+  borderRadius: 8,
+  padding: "0.65rem 1.25rem",
+  fontWeight: 600,
+  cursor: "pointer",
+};
+
+const secondaryButtonStyle: React.CSSProperties = {
+  background: "transparent",
+  border: `1px solid ${colors.border}`,
+  color: colors.muted,
+  borderRadius: 6,
+  padding: "0.35rem 0.75rem",
+  cursor: "pointer",
+};
+
+const linkStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  color: colors.accent,
+  textDecoration: "none",
+  fontSize: "0.875rem",
+};

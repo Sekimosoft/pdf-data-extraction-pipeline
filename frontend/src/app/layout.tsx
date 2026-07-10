@@ -3,9 +3,9 @@ import { LocaleProvider } from "@/lib/locale-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PDF Data Extraction Pipeline | Sekimosoft",
+  title: "PDF Invoice Extraction Pipeline | Sekimosoft",
   description:
-    "Extract validated structured data from text-based PDF invoices and export JSON or CSV.",
+    "Extract text from text-based PDFs and structured invoice fields from supported demo templates.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

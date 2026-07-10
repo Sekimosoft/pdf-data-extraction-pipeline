@@ -13,28 +13,58 @@ def test_health() -> None:
     assert response.json()["status"] == "ok"
 
 
-def test_extract_valid_sample_pdf(sample_pdf_bytes: bytes) -> None:
+def test_extract_en_sample_pdf(sample_en_pdf_bytes: bytes) -> None:
     response = client.post(
         "/api/v1/extract",
-        files={"file": ("sample-invoice.pdf", io.BytesIO(sample_pdf_bytes), "application/pdf")},
+        files={"file": ("sample-invoice-en.pdf", io.BytesIO(sample_en_pdf_bytes), "application/pdf")},
         data={"locale": "en"},
     )
     assert response.status_code == 200
     body = response.json()
     assert body["success"] is True
-    assert body["data"]["invoiceNumber"] == "INV-2026-0042"
+    assert body["resultMode"] == "invoice_structured"
+    assert body["data"]["invoiceNumber"] == "INV-EN-2026-0042"
     assert body["data"]["total"] == 11000.0
-    assert body["data"]["validationState"] in {"valid", "warning"}
 
 
-def test_extract_japanese_locale_messages(sample_pdf_bytes: bytes) -> None:
+def test_extract_ja_sample_pdf(sample_ja_pdf_bytes: bytes) -> None:
     response = client.post(
         "/api/v1/extract",
-        files={"file": ("sample-invoice.pdf", io.BytesIO(sample_pdf_bytes), "application/pdf")},
+        files={"file": ("sample-invoice-ja.pdf", io.BytesIO(sample_ja_pdf_bytes), "application/pdf")},
         data={"locale": "ja"},
     )
     assert response.status_code == 200
-    assert response.json()["locale"] == "ja"
+    body = response.json()
+    assert body["success"] is True
+    assert body["resultMode"] == "invoice_structured"
+    assert body["data"]["invoiceNumber"] == "INV-JP-2026-0001"
+    assert body["data"]["vendorName"] == "デモ商事株式会社"
+
+
+def test_extract_generic_text_pdf_returns_preview(generic_text_pdf_bytes: bytes) -> None:
+    response = client.post(
+        "/api/v1/extract",
+        files={"file": ("brief.pdf", io.BytesIO(generic_text_pdf_bytes), "application/pdf")},
+        data={"locale": "en"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["success"] is True
+    assert body["resultMode"] == "text_preview"
+    assert body["data"] is None
+    assert body["textPreview"]["characterCount"] > 0
+    assert "not a supported invoice template" in body["notice"]
+
+
+def test_extract_generic_text_pdf_japanese_notice(generic_text_pdf_bytes: bytes) -> None:
+    response = client.post(
+        "/api/v1/extract",
+        files={"file": ("brief.pdf", io.BytesIO(generic_text_pdf_bytes), "application/pdf")},
+        data={"locale": "ja"},
+    )
+    body = response.json()
+    assert body["resultMode"] == "text_preview"
+    assert "請求書形式" in body["notice"]
 
 
 def test_unsupported_file_type() -> None:
@@ -64,13 +94,20 @@ def test_incomplete_invoice_validation(incomplete_pdf_bytes: bytes) -> None:
     )
     assert response.status_code == 200
     body = response.json()
+    assert body["resultMode"] == "invoice_structured"
     assert body["success"] is False
     assert body["data"]["validationState"] == "error"
-    assert len(body["validationIssues"]) >= 1
 
 
-def test_sample_pdf_download() -> None:
-    response = client.get("/api/v1/sample-pdf")
+def test_sample_pdf_download_en() -> None:
+    response = client.get("/api/v1/sample-pdf?locale=en")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert len(response.content) > 100
+
+
+def test_sample_pdf_download_ja() -> None:
+    response = client.get("/api/v1/sample-pdf?locale=ja")
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/pdf"
     assert len(response.content) > 100

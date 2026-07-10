@@ -21,9 +21,19 @@ export type ExtractedDocument = {
   validationState: "valid" | "warning" | "error";
 };
 
+export type TextPreview = {
+  pageCount: number;
+  characterCount: number;
+  textPreview: string;
+  documentStatus: string;
+};
+
 export type ExtractResponse = {
   success: boolean;
+  resultMode: "invoice_structured" | "text_preview" | "extraction_error";
   data: ExtractedDocument | null;
+  textPreview: TextPreview | null;
+  notice: string | null;
   validationIssues: ValidationIssue[];
   provider: string;
   locale: "en" | "ja";
@@ -47,8 +57,8 @@ export async function extractPdf(file: File, locale: "en" | "ja"): Promise<Extra
   return response.json();
 }
 
-export function samplePdfUrl(): string {
-  return `${API_BASE}/api/v1/sample-pdf`;
+export function samplePdfUrl(locale: "en" | "ja"): string {
+  return `${API_BASE}/api/v1/sample-pdf?locale=${locale}`;
 }
 
 export function documentToCsv(doc: ExtractedDocument): string {

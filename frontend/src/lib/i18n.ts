@@ -6,6 +6,11 @@ export type Messages = {
   brand: string;
   title: string;
   description: string;
+  scopeTitle: string;
+  scopeTextBased: string;
+  scopeNoOcr: string;
+  scopeInvoiceTemplates: string;
+  scopeTextPreview: string;
   demoNotice: string;
   sectionUpload: string;
   dropHint: string;
@@ -19,6 +24,11 @@ export type Messages = {
   extracting: string;
   validationIssues: string;
   structuredResult: string;
+  textPreviewResult: string;
+  pageCount: string;
+  characterCount: string;
+  documentStatus: string;
+  textPreviewLabel: string;
   documentType: string;
   invoiceNumber: string;
   issueDate: string;
@@ -39,7 +49,8 @@ export type Messages = {
   errNoFile: string;
   errInvalidType: string;
   errTooLarge: string;
-  errUnexpected: string;
+  errExtractionFailed: string;
+  errValidationFailed: string;
   stateValid: string;
   stateWarning: string;
   stateError: string;
@@ -50,23 +61,33 @@ export type Messages = {
 
 const en: Messages = {
   brand: "Sekimosoft · Portfolio Demo",
-  title: "PDF Data Extraction Pipeline",
+  title: "PDF Invoice Extraction Pipeline",
   description:
-    "Upload a text-based PDF invoice and get validated structured fields — ready to copy as JSON or export as CSV.",
+    "Extract text from any text-based PDF and structured fields from supported invoice templates.",
+  scopeTitle: "Supported scope (V1.1)",
+  scopeTextBased: "Text-based PDFs only",
+  scopeNoOcr: "No scanned images / OCR",
+  scopeInvoiceTemplates: "Structured invoice extraction supports demo EN/JP invoice templates",
+  scopeTextPreview: "Other text PDFs receive a text extraction preview — not structured invoice fields",
   demoNotice:
     "Demo only. Do not upload real customer documents. Files are processed in memory and not stored.",
   sectionUpload: "1. Upload PDF",
   dropHint: "Drag and drop a PDF here",
   browseFiles: "Browse files",
-  supportedFormat: "Supported: text-based PDF only (no scanned images)",
+  supportedFormat: "Text-based PDF only (no scanned images)",
   fileSizeLimit: "Max file size: 5 MB",
   selectedFile: "Selected file",
   removeFile: "Remove",
-  downloadSample: "Download sample PDF",
+  downloadSample: "Download sample invoice PDF",
   extractButton: "Extract data",
   extracting: "Extracting…",
   validationIssues: "Validation issues",
-  structuredResult: "Structured result",
+  structuredResult: "Structured invoice result",
+  textPreviewResult: "Text extraction preview",
+  pageCount: "Page count",
+  characterCount: "Character count",
+  documentStatus: "Document status",
+  textPreviewLabel: "Text preview",
   documentType: "Document type",
   invoiceNumber: "Invoice number",
   issueDate: "Issue date",
@@ -84,11 +105,12 @@ const en: Messages = {
   copied: "Copied to clipboard",
   copyFailed: "Copy failed — select JSON manually",
   footer:
-    "V1 supports a single synthetic invoice template. Not a universal AI PDF parser. Built by Sekimosoft.",
+    "Not a universal AI PDF parser. Invoice templates are synthetic demo fixtures only. Built by Sekimosoft.",
   errNoFile: "Select a PDF file first",
   errInvalidType: "Only PDF files are supported",
   errTooLarge: "File exceeds 5 MB limit",
-  errUnexpected: "Extraction failed — try the sample PDF",
+  errExtractionFailed: "Could not extract text from this PDF — scanned documents are not supported in V1",
+  errValidationFailed: "Invoice validation failed — check the issues below or try the sample invoice PDF",
   stateValid: "Valid",
   stateWarning: "Warning",
   stateError: "Error",
@@ -99,23 +121,33 @@ const en: Messages = {
 
 const ja: Messages = {
   brand: "Sekimosoft · ポートフォリオデモ",
-  title: "PDF Data Extraction Pipeline",
+  title: "PDF請求書データ抽出パイプライン",
   description:
-    "テキストベースのPDF請求書をアップロードし、検証済みの構造化フィールドをJSONコピーまたはCSV出力できます。",
+    "テキストPDFから内容を抽出し、対応する請求書形式は構造化データへ変換します。",
+  scopeTitle: "対応範囲（V1.1）",
+  scopeTextBased: "テキストベースPDFのみ",
+  scopeNoOcr: "スキャン画像 / OCR非対応",
+  scopeInvoiceTemplates: "構造化請求書抽出はデモ用EN/JP請求書テンプレートのみ",
+  scopeTextPreview: "その他のテキストPDFはテキスト抽出プレビューを表示（請求書フィールドは出力しません）",
   demoNotice:
     "デモ用途のみ。実顧客の書類はアップロードしないでください。ファイルはメモリ上で処理され、保存されません。",
   sectionUpload: "1. PDFをアップロード",
   dropHint: "PDFをここにドラッグ＆ドロップ",
   browseFiles: "ファイルを選択",
-  supportedFormat: "対応: テキストベースPDFのみ（スキャン画像不可）",
+  supportedFormat: "テキストベースPDFのみ（スキャン画像不可）",
   fileSizeLimit: "最大ファイルサイズ: 5 MB",
   selectedFile: "選択中のファイル",
   removeFile: "削除",
-  downloadSample: "サンプルPDFをダウンロード",
+  downloadSample: "サンプル請求書PDFをダウンロード",
   extractButton: "データを抽出",
   extracting: "抽出中…",
   validationIssues: "検証結果",
-  structuredResult: "構造化結果",
+  structuredResult: "構造化請求書結果",
+  textPreviewResult: "テキスト抽出プレビュー",
+  pageCount: "ページ数",
+  characterCount: "文字数",
+  documentStatus: "文書ステータス",
+  textPreviewLabel: "テキストプレビュー",
   documentType: "書類種別",
   invoiceNumber: "請求書番号",
   issueDate: "発行日",
@@ -123,7 +155,7 @@ const ja: Messages = {
   vendorName: "請求元",
   customerName: "請求先",
   subtotal: "小計",
-  tax: "税",
+  tax: "消費税",
   total: "合計",
   currency: "通貨",
   confidence: "信頼度",
@@ -133,11 +165,12 @@ const ja: Messages = {
   copied: "クリップボードにコピーしました",
   copyFailed: "コピーに失敗しました — JSONを手動で選択してください",
   footer:
-    "V1は合成請求書テンプレート1種のみ対応。万能AI PDFパーサーではありません。Sekimosoft制作。",
+    "万能AI PDFパーサーではありません。請求書テンプレートは合成デモデータのみです。Sekimosoft制作。",
   errNoFile: "PDFファイルを選択してください",
   errInvalidType: "PDFファイルのみ対応しています",
   errTooLarge: "ファイルサイズが5 MBを超えています",
-  errUnexpected: "抽出に失敗しました — サンプルPDFをお試しください",
+  errExtractionFailed: "PDFからテキストを抽出できませんでした — V1ではスキャン文書非対応です",
+  errValidationFailed: "請求書の検証に失敗しました — 下記を確認するかサンプル請求書PDFをお試しください",
   stateValid: "正常",
   stateWarning: "警告",
   stateError: "エラー",

@@ -1,95 +1,65 @@
-# PDF Data Extraction Pipeline
+# PDF Invoice Extraction Pipeline
 
-**Turn text-based PDF invoices into validated structured data — JSON or CSV — in one step.**
+**Extract text from text-based PDFs — and structured invoice fields from supported demo templates.**
 
-Upload a PDF → extract fields → validate → copy JSON or download CSV. Built as portfolio evidence for document ingestion workflows, not as a universal AI PDF parser.
+Upload a PDF → extract text → if the document matches a supported invoice template, return validated JSON/CSV. Other text PDFs receive a clear text preview instead of a misleading failure.
+
+**Live Demo:** https://pdf-extraction-web.onrender.com  
+**Status:** v1.1.0 — Public, CI green, Live Demo Active
 
 ---
 
 ## Business problem
 
-Finance and operations teams receive PDF invoices and forms, then manually re-type amounts, dates, and vendor details into spreadsheets or ERP systems. That work is slow, error-prone, and hard to audit.
+Finance and operations teams receive PDF invoices and other documents, then manually re-type data into spreadsheets or ERP systems. That work is slow, error-prone, and hard to audit.
 
-This demo proves a focused pipeline: **PDF in → validated structured records out**, with deterministic rules you can test and explain to a buyer.
+This demo proves: **PDF in → text extraction always → structured invoice output when the template matches**, with deterministic rules you can test and explain.
 
 ---
 
 ## Live demo
 
-**Status:** Not deployed yet — Live Demo pending one-time [Render](https://render.com) GitHub OAuth (same as Project 01).
+**URL:** https://pdf-extraction-web.onrender.com
 
-**Run locally:** see [How to run](#how-to-run) below. Use the included **sample PDF** — do not upload real customer documents.
-
----
-
-## Screenshots
-
-Screenshots will be added after Live Demo deployment. Run locally with the sample PDF to preview EN / JP upload and result states.
+- **Mock / rule-based** — no API keys required
+- Download **EN or JP sample invoice PDF** from the UI (matches current locale)
+- Do not upload real customer documents
 
 ---
 
 ## How it works
 
 ```text
-Upload PDF → Text extract (pdfplumber) → Rule-based field parse → Validation → JSON / CSV
+Upload PDF → Validate → Text extract (pdfplumber) → Suitability check
+  ├─ Supported invoice template → Parse → Validate → JSON / CSV
+  └─ Other text PDF → Text preview (pages, chars, excerpt) + clear notice
 ```
-
-1. User uploads a **text-based PDF** (single-page invoice template in V1).
-2. Backend extracts raw text with **pdfplumber** — no OCR, no AI API.
-3. **Deterministic regex parsers** map labels to schema fields.
-4. **Validation rules** check required fields, dates, amounts, and totals.
-5. UI shows structured result with validation state; user copies JSON or downloads CSV.
 
 ---
 
-## Supported document scope (V1)
+## Supported document scope (V1.1)
 
-| Supported | Not supported in V1 |
+| Supported | Not supported |
 |---|---|
 | Text-based PDF (selectable text) | Scanned / image-only PDFs |
-| Single synthetic invoice template | Arbitrary document layouts |
-| English label patterns in sample (`Invoice Number:`, `Total:`, etc.) | OCR |
+| Demo EN/JP synthetic invoice templates | Arbitrary invoice layouts |
+| Generic text PDF → text preview | OCR |
 | Up to 5 MB, 10 pages | Password-protected PDFs |
-| Fictional demo PDF only | Real customer documents |
+| Fictional demo data only | Real customer documents |
 
-**Honest scope:** V1 is **not** a “read any PDF with AI” product. It demonstrates **document parsing + schema validation** for one invoice pattern.
+**Honest scope:** Not a universal AI PDF parser. Structured invoice fields apply only to supported demo templates.
 
 ---
 
 ## Architecture
-
-```text
-┌─────────────┐     multipart      ┌──────────────────┐
-│  Next.js    │ ────────────────►  │  FastAPI         │
-│  Upload UI  │ ◄────────────────  │  Extract API     │
-└─────────────┘     JSON           └────────┬─────────┘
-                                            │
-                    ┌───────────────────────┼───────────────────────┐
-                    ▼                       ▼                       ▼
-              pdfplumber              invoice_parser           validation
-              (text extract)          (regex rules)            (Pydantic)
-```
 
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js 15, TypeScript, React 19 |
 | Backend | FastAPI, Python 3.12, Pydantic v2 |
 | PDF | pdfplumber |
-| Storage | None — in-memory processing only |
-| Database | None |
-| AI | None in V1 |
-
-**Different from [AI Lead Triage CRM Router](https://github.com/Sekimosoft/ai-lead-triage-crm-router):** Project 01 interprets **free-text inquiries** with AI. Project 02 parses **binary PDF documents** with deterministic extraction — different buyer pain, different proof.
-
----
-
-## Design principles
-
-- Prove **document ingestion**, not conversational AI.
-- **Deterministic validation** before export — fail safely on bad data.
-- **No persistence** of uploaded files.
-- **Minimal V1 scope** — one template, honest README boundaries.
-- EN / JP UI for Japan invoice workflow context; JSON field names stay English.
+| Storage | None — in-memory only |
+| AI / OCR | None |
 
 ---
 
@@ -97,55 +67,34 @@ Upload PDF → Text extract (pdfplumber) → Rule-based field parse → Validati
 
 | Decision | Why |
 |---|---|
-| **Text-based PDF only in V1** | Many business PDFs are text-native; OCR adds cost and changes the proof focus. |
-| **No OCR** | Keeps V1 small, testable, and honest — scanned docs get a clear error. |
-| **Deterministic extraction before AI** | Business-critical fields should be validated by rules, not guessed. |
-| **Files not persisted** | Demo privacy and simpler deployment — no storage liability. |
-| **Validation separated from extraction** | Parsing can succeed partially; validation flags what is safe to export. |
+| Text-based PDF only | Many business PDFs are text-native; OCR changes proof focus |
+| Text preview for non-invoices | Unsupported documents should not look like hard failures |
+| EN + JP invoice samples | Invoice workflows matter in both markets; JSON keys stay English |
+| Fixtures in `app/fixtures/` | Sample PDFs ship with the app bundle — reliable on Render |
+| No file persistence | Demo privacy and simpler deployment |
 
 ---
 
 ## Security and privacy
 
-- **Demo only** — do not upload real customer documents.
-- **No persistent storage** — PDFs processed in memory and discarded.
-- MIME type and `.pdf` extension checks; max **5 MB** file size.
-- Filename is not trusted for security decisions.
-- Temp files deleted after processing.
-- No secrets in repository — use `.env.example` only.
+- Demo only — do not upload real customer documents
+- No persistent storage — PDFs processed in memory and discarded
+- Max 5 MB, MIME/extension validation
 
 ---
 
 ## How to run
 
-### Prerequisites
-
-- Python 3.12+
-- Node.js 22+
-
-### Backend
-
 ```bash
-cd backend
-pip install -r requirements.txt
+# Backend
+cd backend && pip install -r requirements.txt
+python app/fixtures/generate_fixtures.py  # optional — PDFs committed in repo
 uvicorn app.main:app --reload --port 8000
-```
 
-### Frontend
-
-```bash
-cd frontend
-npm install
+# Frontend
+cd frontend && npm install
 echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 npm run dev
-```
-
-Open http://localhost:3000 — download the sample PDF, upload it, extract.
-
-### Docker (optional)
-
-```bash
-docker compose up --build
 ```
 
 ---
@@ -153,21 +102,10 @@ docker compose up --build
 ## Testing
 
 ```bash
-# Backend
 cd backend && pytest -v
-
-# Frontend
 cd frontend && npm test && npm run lint && npm run build
 ```
 
-GitHub Actions runs both on push to `main`.
-
 ---
-
-## Copyright
 
 Copyright © Sekimosoft. No license is granted for reuse.
-
----
-
-**Sekimosoft** · Portfolio project · Related: [BizDXAI](https://github.com/Sekimosoft) product work remains private; this repo is independent public evidence.

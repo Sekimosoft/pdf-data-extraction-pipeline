@@ -5,6 +5,7 @@ pydantic-settings==2.7.0
 python-multipart==0.0.20
 pdfplumber==0.11.4
 httpx==0.28.1
+reportlab==4.2.5
 
 # test
 pytest==8.3.4

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 
 from app.config import Settings, get_settings
@@ -34,13 +34,14 @@ async def extract_pdf(
 
 
 @router.get("/sample-pdf")
-async def download_sample_pdf() -> Response:
+async def download_sample_pdf(locale: Locale = Query(default="en")) -> Response:
     try:
-        content = get_sample_pdf_bytes()
+        content = get_sample_pdf_bytes(locale)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Sample PDF not found") from exc
+    filename = "sample-invoice-ja.pdf" if locale == "ja" else "sample-invoice-en.pdf"
     return Response(
         content=content,
         media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="sample-invoice.pdf"'},
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 Locale = Literal["en", "ja"]
 ValidationState = Literal["valid", "warning", "error"]
+ResultMode = Literal["invoice_structured", "text_preview", "extraction_error"]
 
 
 class ValidationIssue(BaseModel):
@@ -28,9 +29,19 @@ class ExtractedDocument(BaseModel):
     validationState: ValidationState
 
 
+class TextPreview(BaseModel):
+    pageCount: int
+    characterCount: int
+    textPreview: str
+    documentStatus: str = "unsupported_invoice_template"
+
+
 class ExtractResponse(BaseModel):
     success: bool
+    resultMode: ResultMode
     data: ExtractedDocument | None = None
+    textPreview: TextPreview | None = None
+    notice: str | None = None
     validationIssues: list[ValidationIssue] = Field(default_factory=list)
     provider: str = "rule-based"
     locale: Locale = "en"

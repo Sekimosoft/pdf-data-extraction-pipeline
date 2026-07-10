@@ -1,20 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_LOCALE, getMessages, validationStateLabel } from "@/lib/i18n";
-import { documentToCsv, type ExtractedDocument } from "@/lib/api";
+import { documentToCsv, samplePdfUrl, type ExtractedDocument } from "@/lib/api";
 
 describe("i18n", () => {
   it("defaults to English", () => {
     expect(DEFAULT_LOCALE).toBe("en");
-    expect(getMessages("en").extractButton).toBe("Extract data");
+    expect(getMessages("en").title).toBe("PDF Invoice Extraction Pipeline");
   });
 
-  it("switches to Japanese", () => {
-    expect(getMessages("ja").extractButton).toBe("データを抽出");
+  it("switches to Japanese title", () => {
+    expect(getMessages("ja").title).toBe("PDF請求書データ抽出パイプライン");
   });
 
   it("maps validation state labels", () => {
     expect(validationStateLabel("en", "valid")).toBe("Valid");
     expect(validationStateLabel("ja", "warning")).toBe("警告");
+  });
+});
+
+describe("samplePdfUrl", () => {
+  it("includes locale query", () => {
+    expect(samplePdfUrl("en")).toContain("locale=en");
+    expect(samplePdfUrl("ja")).toContain("locale=ja");
   });
 });
 

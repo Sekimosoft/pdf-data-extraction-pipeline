@@ -5,7 +5,13 @@ class PdfReadError(Exception):
     pass
 
 
-def extract_text_from_pdf(path: str, max_pages: int) -> str:
+class PdfTextResult:
+    def __init__(self, text: str, page_count: int) -> None:
+        self.text = text
+        self.page_count = page_count
+
+
+def extract_text_from_pdf(path: str, max_pages: int) -> PdfTextResult:
     try:
         with pdfplumber.open(path) as pdf:
             if len(pdf.pages) > max_pages:
@@ -14,7 +20,8 @@ def extract_text_from_pdf(path: str, max_pages: int) -> str:
             for page in pdf.pages[:max_pages]:
                 page_text = page.extract_text() or ""
                 parts.append(page_text)
-            return "\n".join(parts).strip()
+            text = "\n".join(parts).strip()
+            return PdfTextResult(text=text, page_count=min(len(pdf.pages), max_pages))
     except PdfReadError:
         raise
     except Exception as exc:
