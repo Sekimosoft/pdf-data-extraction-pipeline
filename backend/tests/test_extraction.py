@@ -43,7 +43,9 @@ def test_parse_ja_invoice_text_full() -> None:
 def test_is_invoice_candidate() -> None:
     assert is_invoice_candidate("INVOICE\nVendor: Demo")
     assert is_invoice_candidate("請求書\n発行元: Demo")
+    assert is_invoice_candidate("Document Type: invoice\nVendor: Demo")
     assert not is_invoice_candidate("Project Brief only")
+    assert not is_invoice_candidate("It is not an invoice and should return text preview only.")
 
 
 def test_validation_success() -> None:

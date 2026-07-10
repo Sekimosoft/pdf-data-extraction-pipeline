@@ -50,8 +50,14 @@ def _parse_amount(raw: str) -> float:
 
 
 def is_invoice_candidate(text: str) -> bool:
-    upper = text.upper()
-    return "INVOICE" in upper or "請求書" in text
+    """Detect V1 demo invoice templates — not arbitrary mentions of 'invoice' in prose."""
+    if "請求書" in text:
+        return True
+    if re.search(r"(?m)^\s*INVOICE\s*$", text, re.IGNORECASE):
+        return True
+    if re.search(r"Document\s+Type:\s*invoice\b", text, re.IGNORECASE):
+        return True
+    return False
 
 
 def parse_invoice_text(text: str) -> dict[str, Any]:
