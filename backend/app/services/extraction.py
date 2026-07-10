@@ -60,9 +60,6 @@ class ExtractionService:
             parsed = parse_invoice_text(pdf_result.text)
             document, issues = validate_extraction(parsed, locale)
 
-            if document.validationState == "error" and document.confidence < 0.35:
-                return self._text_preview_response(pdf_result.text, pdf_result.page_count, locale)
-
             return ExtractResponse(
                 success=document.validationState != "error",
                 resultMode="invoice_structured",
