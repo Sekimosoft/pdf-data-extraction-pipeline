@@ -5,7 +5,10 @@
 Upload a PDF → extract text → if the document matches a supported invoice template, return validated JSON/CSV. Other text PDFs receive a clear text preview instead of a misleading failure.
 
 **Live Demo:** https://pdf-extraction-web.onrender.com  
+**API (live):** https://pdf-extraction-api-9bub.onrender.com  
 **Status:** v1.1.0 — Public, CI green, Live Demo Active
+
+> **Note:** Render issued a different backend hostname than the service name. See [environment-notes](../../docs/handover/environment-notes.md) before changing env vars.
 
 ---
 
@@ -23,7 +26,33 @@ This demo proves: **PDF in → text extraction always → structured invoice out
 
 - **Mock / rule-based** — no API keys required
 - Download **EN or JP sample invoice PDF** from the UI (matches current locale)
+- Non-invoice text PDFs show a **text preview** with page/character counts — not a hard failure
 - Do not upload real customer documents
+
+### Verified live behavior (2026-07-10)
+
+| Scenario | Result |
+|---|---|
+| `GET /api/v1/health` | 200 |
+| EN sample download + structured extraction | Success |
+| JP sample download + structured extraction | Success (`INV-JP-2026-0001`, `validationState: valid`) |
+| Generic text PDF (BI brief) | `text_preview` + unsupported notice |
+| Non-PDF upload | HTTP 400 — clear error message |
+
+---
+
+## Screenshots
+
+| EN structured invoice | JP structured invoice | Generic text preview |
+|---|---|---|
+| ![EN structured result](./docs/screenshots/screenshot-en-structured.png) | ![JP structured result](./docs/screenshots/screenshot-ja-structured.png) | ![Text preview](./docs/screenshots/screenshot-en-text-preview.png) |
+
+Regenerate after UI changes:
+
+```bash
+npx playwright install chromium
+node scripts/capture-screenshots.mjs
+```
 
 ---
 
