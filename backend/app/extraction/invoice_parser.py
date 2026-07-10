@@ -10,7 +10,7 @@ FIELD_PATTERNS: dict[str, re.Pattern[str]] = {
     "customerName": re.compile(r"Customer:\s*(.+)", re.IGNORECASE),
     "subtotal": re.compile(r"Subtotal:\s*([\d,]+\.?\d*)", re.IGNORECASE),
     "tax": re.compile(r"Tax:\s*([\d,]+\.?\d*)", re.IGNORECASE),
-    "total": re.compile(r"Total:\s*([\d,]+\.?\d*)", re.IGNORECASE),
+    "total": re.compile(r"(?<!Sub)Total:\s*([\d,]+\.?\d*)", re.IGNORECASE),
     "currency": re.compile(r"Currency:\s*([A-Z]{3})", re.IGNORECASE),
 }
 
